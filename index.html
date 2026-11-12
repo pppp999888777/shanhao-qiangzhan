@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="善皓枪战2"><meta name="theme-color" content="#0b0d0f"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png">
 <title>善皓枪战2</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -6274,13 +6274,20 @@ errors ${window.__errors.length}${window.__errors.length?`
 #skillhud .bar{width:180px;height:3px;background:rgba(232,228,218,.2);margin:6px auto 0}#skillhud .bar i{display:block;height:100%;background:#ffb347;width:0}
 #skillhud.ready .bar i{background:#9fe07a}#skillhud.act{color:#ffb347}
 #skillhud .t{font-size:14px;font-weight:700}#skillhud .s{font-size:11px;opacity:.7}
-#skillbtn{position:fixed;right:max(18px,env(safe-area-inset-right));top:40%;z-index:9001;width:74px;height:74px;border-radius:50%;border:2px solid rgba(255,179,71,.85);background:rgba(11,13,15,.55);color:#ffb347;font:700 14px "PingFang SC",sans-serif;display:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#skillbtn{position:fixed;right:calc(192px + env(safe-area-inset-right));bottom:calc(178px + env(safe-area-inset-bottom));z-index:9001;width:66px;height:66px;border-radius:50%;border:2px solid rgba(255,179,71,.85);background:rgba(11,13,15,.55);color:#ffb347;font:700 13px "PingFang SC",sans-serif;display:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #skillbtn.cd{color:rgba(232,228,218,.5);border-color:rgba(232,228,218,.3)}
+#rotate{position:fixed;inset:0;z-index:99999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0b0d0f;color:#e8e4da;font:700 18px "PingFang SC",sans-serif;text-align:center;padding:24px}
+#rotate b{font-size:54px;color:#ffb347;display:block;animation:rot 1.6s ease-in-out infinite}@keyframes rot{0%,20%{transform:rotate(0)}60%,100%{transform:rotate(90deg)}}
+#rotate small{font-weight:400;font-size:13px;color:rgba(232,228,218,.6)}
+#fsbtn,#a2hs{display:none;position:fixed;left:max(12px,env(safe-area-inset-left));z-index:9002;font:700 12px "PingFang SC",sans-serif}
+#fsbtn{top:12px;padding:7px 12px;border-radius:4px;border:1px solid rgba(232,228,218,.4);background:rgba(11,13,15,.7);color:#e8e4da}
+#a2hs{bottom:10px;font-weight:400;color:rgba(255,200,120,.85);max-width:60vw;pointer-events:none}
+html,body{overscroll-behavior:none;-webkit-touch-callout:none}
 #mstoggle{display:none;position:fixed;right:12px;top:12px;z-index:9002;padding:8px 12px;border-radius:4px;border:1px solid #ffb347;background:rgba(11,13,15,.8);color:#ffb347;font:700 13px "PingFang SC",sans-serif}
 @media (max-width:900px),(max-height:560px){#mapsel{top:52px;right:12px;bottom:12px;width:min(340px,calc(100vw - 24px))}#mapsel.fold{display:none!important}}
 </style>
 <div id="mapsel"><h3>选择地图</h3><div id="ms-maps"></div><h3>选择干员</h3><div id="ms-heroes"></div></div>
-<button id="mstoggle">选择地图 / 干员 ▾</button><button id="skillbtn">技能</button><div id="skillhud"><div class="t"></div><div class="s"></div><div class="bar"><i></i></div></div>
+<div id="rotate"><b>📱</b>请把手机横过来玩<small>横屏后自动继续</small></div><button id="fsbtn">⛶ 全屏</button><div id="a2hs">iPhone：点浏览器的「分享」→「添加到主屏幕」，从桌面图标打开就是全屏</div><button id="mstoggle">选择地图 / 干员 ▾</button><button id="skillbtn">技能</button><div id="skillhud"><div class="t"></div><div class="s"></div><div class="bar"><i></i></div></div>
 <script>
 (function(){var box=document.getElementById("mapsel"),M=window.__M,CH=window.__CH,SK=window.__SK;
 function go(key,val){var q=new URLSearchParams(location.search);q.set(key,val);location.search=q.toString()}
@@ -6302,13 +6309,27 @@ function fire(){var G=window.__G;if(!G||!G.player||!G.player.alive)return;var st
 addEventListener("keydown",function(e){if(e.code==="KeyG"&&!e.repeat)fire()});
 var small=function(){return innerWidth<=900||innerHeight<=560},tg=document.getElementById("mstoggle"),sb=document.getElementById("skillbtn"),touch=("ontouchstart" in window)||navigator.maxTouchPoints>0;
 if(small())box.classList.add("fold");
+var fsb=document.getElementById("fsbtn"),rot=document.getElementById("rotate"),a2=document.getElementById("a2hs"),wl=null;
+var isIOS=/iP(hone|od|ad)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),standalone=navigator.standalone||matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches;
+function isFull(){return !!(document.fullscreenElement||document.webkitFullscreenElement)}
+function goFull(){if(!touch||isFull()||standalone)return;var d=document.documentElement;try{var r=d.requestFullscreen?d.requestFullscreen({navigationUI:"hide"}):d.webkitRequestFullscreen&&d.webkitRequestFullscreen();var lk=function(){try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock("landscape").catch(function(){})}catch(e){}};r&&r.then?r.then(lk).catch(function(){}):lk()}catch(e){}}
+function onAct(e){var b=e.target&&e.target.closest&&e.target.closest('[data-act="deploy"],[data-act="retry"],[data-act="restart"],[data-act="redeploy"],[data-act="resume"]');if(b)goFull()}
+document.addEventListener("click",onAct,true);document.addEventListener("touchend",onAct,true);
+fsb.onclick=function(){if(isFull()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}else goFull()};
+document.addEventListener("gesturestart",function(e){e.preventDefault()});document.addEventListener("dblclick",function(e){e.preventDefault()});
+var wp=false;async function wake(on){try{if(on&&!wl&&!wp&&navigator.wakeLock){wp=true;wl=await navigator.wakeLock.request("screen");wp=false;wl.addEventListener("release",function(){wl=null})}else if(!on&&wl){await wl.release();wl=null}}catch(e){wp=false}}
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&lastState==="playing")wake(true)});
 tg.onclick=function(){box.classList.toggle("fold");tg.textContent=box.classList.contains("fold")?"选择地图 / 干员 ▾":"收起 ▴"};
 sb.addEventListener("touchstart",function(e){e.preventDefault();e.stopPropagation();fire()},{passive:false});sb.onclick=function(e){e.stopPropagation();fire()};
 setInterval(function(){var now=performance.now(),dt=Math.min(.25,(now-last)/1000);last=now;
  var st=window.__stats&&window.__stats().state;var boot=document.getElementById("boot");var ready=!boot||boot.hidden||boot.classList.contains("done");
  box.style.display=(st==="title"&&ready)?"block":"none";
  tg.style.display=(st==="title"&&ready&&small())?"block":"none";
- sb.style.display=(st==="playing"&&touch)?"block":"none";sb.className=(cd>0&&act<=0)?"cd":"";sb.textContent=act>0?act.toFixed(0)+"s":cd>0?Math.ceil(cd)+"s":CH.skill;
+ sb.style.display=(st==="playing"&&touch)?"block":"none";
+ var portrait=touch&&innerHeight>innerWidth*1.05;rot.style.display=portrait?"flex":"none";
+ fsb.style.display=(touch&&!standalone&&(st==="title"||st==="paused")&&ready&&(document.fullscreenEnabled||document.webkitFullscreenEnabled))?"block":"none";fsb.textContent=isFull()?"退出全屏":"⛶ 全屏";
+ a2.style.display=(isIOS&&!standalone&&st==="title"&&ready&&!document.fullscreenEnabled)?"block":"none";
+ wake(st==="playing");sb.className=(cd>0&&act<=0)?"cd":"";sb.textContent=act>0?act.toFixed(0)+"s":cd>0?Math.ceil(cd)+"s":CH.skill;
  if(st==="title"&&lastState&&lastState!=="title"){cd=0;act=0;reset()}
  if(st==="playing"&&lastState!=="playing"&&lastState!=="paused"){cd=0;act=0;reset()}
  if(st==="playing"){if(act>0){act-=dt;if(act<=0){act=0;reset()}}else if(cd>0){cd=Math.max(0,cd-dt)}}
